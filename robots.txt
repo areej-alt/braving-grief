@@ -1,0 +1,15 @@
+# robots.txt for Braving Grief Website
+
+User-agent: *
+Allow: /
+
+
+# Allow all bots to crawl images
+Allow: /images/
+
+# Allow all bots to crawl CSS and JS
+Allow: /css/
+Allow: /js/
+
+# Sitemap location
+Sitemap: https://www.bravinggrief.com/sitemap.xml
