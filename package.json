@@ -4,8 +4,9 @@
   "description": "Official website for Braving Grief by Tasneem Rahman",
   "main": "index.html",
   "scripts": {
-    "dev": "npx tailwindcss -i ./css/input.css -o ./css/output.css --watch",
-    "build": "npx tailwindcss -i ./css/input.css -o ./css/output.css --minify",
+    "dev": "node ./node_modules/tailwindcss/lib/cli.js -i ./css/input.css -o ./css/output.css --watch",
+    "build": "node ./node_modules/tailwindcss/lib/cli.js -i ./css/input.css -o ./css/output.css --minify",
+    "postinstall": "chmod +x ./node_modules/.bin/tailwindcss || true",
     "serve": "npx serve .",
     "deploy": "npm run build && powershell Write-Host 'Ready for deployment'"
   },
