@@ -232,18 +232,24 @@ const initCarousel = () => {
   
   if (!carousel || !prevBtn || !nextBtn) return;
 
+
   let currentIndex = 0;
-  const totalReviews = 7;
-  const reviewsPerView = window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 3;
-  const maxIndex = totalReviews - reviewsPerView;
+  const totalReviews = carousel.children.length || 7;
+  let reviewsPerView = window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 3;
+
+  const getMaxIndex = () => Math.max(0, totalReviews - reviewsPerView);
 
   const updateCarousel = () => {
-    const offset = -(currentIndex * 100) / reviewsPerView;
-    carousel.style.transform = `translateX(${offset}%)`;
-    
-    // Update indicators
-    indicators.forEach((indicator, index) => {
-      if (index === Math.floor(currentIndex / 1)) {
+    // compute slide width in pixels (accounts for paddings/margins)
+    const firstSlide = carousel.children[0];
+    const slideWidth = firstSlide ? firstSlide.getBoundingClientRect().width : 0;
+    const offsetPx = currentIndex * slideWidth;
+    carousel.style.transform = `translateX(-${offsetPx}px)`;
+
+    // Update indicators: map currentIndex to a page index (page per view)
+    const pageIndex = Math.floor(currentIndex / Math.max(1, reviewsPerView));
+    indicators.forEach((indicator, idx) => {
+      if (idx === pageIndex) {
         indicator.classList.add('bg-primary');
         indicator.classList.remove('bg-gray-300');
         indicator.setAttribute('aria-current', 'true');
@@ -256,19 +262,21 @@ const initCarousel = () => {
 
     // Update button states
     prevBtn.disabled = currentIndex === 0;
-    nextBtn.disabled = currentIndex >= maxIndex;
+    nextBtn.disabled = currentIndex >= getMaxIndex();
   };
 
   prevBtn.addEventListener('click', () => {
     if (currentIndex > 0) {
-      currentIndex--;
+      // move exactly one slide back
+      currentIndex = Math.max(0, currentIndex - 1);
       updateCarousel();
     }
   });
 
   nextBtn.addEventListener('click', () => {
-    if (currentIndex < maxIndex) {
-      currentIndex++;
+    if (currentIndex < getMaxIndex()) {
+      // move exactly one slide forward
+      currentIndex = Math.min(getMaxIndex(), currentIndex + 1);
       updateCarousel();
     }
   });
@@ -281,11 +289,15 @@ const initCarousel = () => {
     });
   });
 
-  // Handle window resize
+  // Handle window resize: recompute slides-per-view and reset if layout changes
   window.addEventListener('resize', () => {
     const newReviewsPerView = window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 3;
     if (newReviewsPerView !== reviewsPerView) {
+      reviewsPerView = newReviewsPerView;
       currentIndex = 0;
+      updateCarousel();
+    } else {
+      // Even if count didn't change, recompute transform in case slide width changed
       updateCarousel();
     }
   });
